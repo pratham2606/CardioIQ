@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CardioIQ | Project Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #eef6fb;
+            --surface: rgba(255, 255, 255, 0.82);
+            --surface-solid: #ffffff;
+            --border: rgba(13, 148, 136, 0.22);
+            --accent: #0d9488;
+            --accent-dim: rgba(13, 148, 136, 0.1);
+            --accent-glow: rgba(13, 148, 136, 0.28);
+            --purple: #6366f1;
+            --text: #1e293b;
+            --muted: #64748b;
+            --danger: #e11d48;
+            --warn: #d97706;
+            --success: #0d9488;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* ── 3D Background ── */
+        #bg3d {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .grid-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            background:
+                linear-gradient(rgba(13,148,136,0.07) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(13,148,136,0.07) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, black 20%, transparent 80%);
+        }
+
+        .glow-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: 1;
+        }
+        .glow-orb.a { width: 500px; height: 500px; background: rgba(13,148,136,0.14); top: -100px; left: -100px; animation: drift 12s ease-in-out infinite; }
+        .glow-orb.b { width: 400px; height: 400px; background: rgba(99,102,241,0.12); bottom: 10%; right: -80px; animation: drift 15s ease-in-out infinite reverse; }
+
+        @keyframes drift {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(40px, 30px); }
+        }
+
+        /* ── Layout ── */
+        .wrapper { position: relative; z-index: 2; }
+
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 2.5rem;
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 700;
+            font-size: 1.05rem;
+            letter-spacing: -0.02em;
+        }
+
+        .logo-icon {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            border-radius: 10px;
+            display: grid; place-items: center;
+            font-size: 1.1rem;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        nav a:hover { color: var(--accent); }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent);
+            background: var(--accent-dim);
+            border: 1px solid var(--border);
+            padding: 0.35rem 0.85rem;
+            border-radius: 999px;
+        }
+
+        .status-dot {
+            width: 7px; height: 7px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.85)} }
+
+        section { padding: 5rem 2.5rem; max-width: 1280px; margin: 0 auto; }
+
+        .section-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 0.75rem;
+        }
+
+        h2 {
+            font-size: clamp(1.6rem, 3vw, 2.2rem);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 1rem;
+        }
+
+        .section-desc {
+            color: var(--muted);
+            max-width: 680px;
+            font-size: 0.95rem;
+            margin-bottom: 2.5rem;
+        }
+
+        /* ── Hero ── */
+        #home {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+            min-height: 88vh;
+            padding-top: 3rem;
+        }
+
+        .hero-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--purple);
+            background: rgba(124,108,240,0.1);
+            border: 1px solid rgba(124,108,240,0.25);
+            padding: 0.4rem 0.9rem;
+            border-radius: 999px;
+            margin-bottom: 1.5rem;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 4.5vw, 3.2rem);
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -0.04em;
+            margin-bottom: 1.25rem;
+        }
+
+        h1 span {
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-desc {
+            color: var(--muted);
+            font-size: 1rem;
+            line-height: 1.75;
+            margin-bottom: 2rem;
+        }
+
+        .hero-btns {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.25s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #00a888);
+            color: #ffffff;
+            box-shadow: 0 0 30px var(--accent-glow);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 45px var(--accent-glow); }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* ECG Card */
+        .ecg-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            backdrop-filter: blur(16px);
+            box-shadow: 0 20px 60px rgba(13, 148, 136, 0.12), inset 0 1px 0 rgba(255,255,255,0.9);
+        }
+
+        .ecg-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .ecg-card-header span {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--muted);
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.72rem;
+            color: var(--accent);
+        }
+
+        #ecgCanvas {
+            width: 100%;
+            height: 180px;
+            display: block;
+            border-radius: 10px;
+            background: rgba(240, 249, 255, 0.9);
+        }
+
+        .ecg-meta {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .ecg-meta-item {
+            background: rgba(240, 249, 255, 0.85);
+            border-radius: 8px;
+            padding: 0.6rem 0.75rem;
+            text-align: center;
+        }
+
+        .ecg-meta-item .val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .ecg-meta-item .lbl {
+            font-size: 0.65rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        /* ── Stats Grid ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin: -2rem 2.5rem 0;
+            max-width: 1280px;
+            position: relative;
+            z-index: 3;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(16px);
+            transition: transform 0.25s, border-color 0.25s;
+        }
+        .stat-card:hover { transform: translateY(-4px); border-color: rgba(13,148,136,0.45); }
+
+        .stat-card .num {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, var(--accent), #134e4a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-card .label { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; }
+        .stat-card .sub { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--accent); margin-top: 0.5rem; opacity: 0.8; }
+
+        /* ── Pipeline ── */
+        .pipeline-flow {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            overflow-x: auto;
+            padding: 1rem 0;
+        }
+
+        .pipe-step {
+            flex-shrink: 0;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.25rem 1.5rem;
+            min-width: 140px;
+            text-align: center;
+            transition: all 0.25s;
+        }
+        .pipe-step:hover { border-color: var(--accent); box-shadow: 0 8px 24px var(--accent-dim); }
+
+        .pipe-step .icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .pipe-step .name { font-size: 0.82rem; font-weight: 600; }
+        .pipe-step .detail { font-size: 0.68rem; color: var(--muted); margin-top: 0.3rem; font-family: 'JetBrains Mono', monospace; }
+
+        .pipe-arrow {
+            flex-shrink: 0;
+            color: var(--accent);
+            font-size: 1.2rem;
+            padding: 0 0.5rem;
+            opacity: 0.5;
+        }
+
+        /* ── Architecture ── */
+        .arch-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .arch-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        .arch-box::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--purple));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .arch-box:hover::before { opacity: 1; }
+        .arch-box:hover { border-color: rgba(13,148,136,0.4); transform: translateY(-3px); }
+
+        .arch-box .step-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--accent);
+            margin-bottom: 0.75rem;
+        }
+
+        .arch-box h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .arch-box p { font-size: 0.8rem; color: var(--muted); line-height: 1.6; }
+
+        .arch-box .spec {
+            margin-top: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.68rem;
+            color: var(--purple);
+            background: rgba(124,108,240,0.08);
+            padding: 0.35rem 0.6rem;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        /* ── Results ── */
+        .results-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .metric-panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.75rem;
+        }
+
+        .metric-panel h3 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 1.25rem;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.65rem 0;
+            border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+        }
+        .metric-row:last-child { border-bottom: none; }
+
+        .metric-row .key { font-size: 0.85rem; color: var(--muted); }
+        .metric-row .val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .metric-bar-wrap { flex: 1; margin: 0 1rem; }
+        .metric-bar {
+            height: 4px;
+            background: rgba(15, 23, 42, 0.08);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+        .metric-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--purple));
+            border-radius: 99px;
+            transition: width 1.5s ease;
+        }
+
+        .class-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .class-chip {
+            background: rgba(240, 249, 255, 0.9);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.85rem 0.5rem;
+            text-align: center;
+        }
+
+        .class-chip .cls-name {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .class-chip .cls-conf {
+            font-size: 0.72rem;
+            color: var(--accent);
+            margin-top: 0.25rem;
+        }
+
+        /* ── Config Table ── */
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .config-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 0.85rem 1.1rem;
+        }
+
+        .config-item .k {
+            font-size: 0.8rem;
+            color: var(--muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .config-item .v {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        /* ── Footer ── */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 3rem 2.5rem;
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        footer h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+        footer p { font-size: 0.8rem; color: var(--muted); }
+        footer .tech-tags {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1.25rem;
+        }
+
+        .tech-tag {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.68rem;
+            color: var(--accent);
+            background: var(--accent-dim);
+            border: 1px solid var(--border);
+            padding: 0.3rem 0.7rem;
+            border-radius: 6px;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 1024px) {
+            #home { grid-template-columns: 1fr; min-height: auto; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); margin: 0 1.5rem; }
+            .arch-grid { grid-template-columns: repeat(2, 1fr); }
+            .results-layout { grid-template-columns: 1fr; }
+            .class-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        @media (max-width: 640px) {
+            nav { padding: 1rem 1.25rem; }
+            nav ul { display: none; }
+            section { padding: 3.5rem 1.25rem; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .arch-grid { grid-template-columns: 1fr; }
+            .config-grid { grid-template-columns: 1fr; }
+            .class-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 3D Background Canvas -->
+<canvas id="bg3d"></canvas>
+<div class="grid-overlay"></div>
+<div class="glow-orb a"></div>
+<div class="glow-orb b"></div>
+
+<div class="wrapper">
+
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">
+            <div class="logo-icon">⚡</div>
+            CardioIQ
+        </div>
+        <ul>
+            <li><a href="#home">Dashboard</a></li>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#pipeline">Pipeline</a></li>
+            <li><a href="#architecture">Architecture</a></li>
+            <li><a href="#results">Results</a></li>
+            <li><a href="#config">Config</a></li>
+        </ul>
+        <div class="status-badge">
+            <div class="status-dot"></div>
+            Trained · Colab T4
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section id="home">
+        <div class="hero-left">
+            <div class="hero-tag">// Bayesian Deep Learning · Mamba-Inspired Architecture · PTB-XL</div>
+            <h1>CardioIQ<br><span>Bayesian ECG Diagnosis</span></h1>
+            <p class="hero-desc">
+                A Bayesian neural network pipeline for automated electrocardiogram classification
+                on the PTB-XL dataset. <strong>CardioIQ</strong> combines multi-scale
+                Bayesian convolutions with a custom Mamba inspired state-space encoder. The model outputs
+                diagnostic probabilities and Monte Carlo uncertainty estimates across 5
+                PTB-XL diagnostic superclasses.
+            </p>
+            <div class="hero-btns">
+                <a href="#architecture" class="btn btn-primary">View Architecture</a>
+                <a href="#results" class="btn btn-ghost">Test Metrics</a>
+                <a href="https://github.com/pratham2606/CardioIQ" class="btn btn-ghost" target="_blank" rel="noopener noreferrer">GitHub</a>
+            </div>
+        </div>
+
+        <div class="hero-right">
+            <div class="ecg-card">
+                <div class="ecg-card-header">
+                    <span>12-LEAD ECG · 100 Hz · 1000 samples</span>
+                    <div class="live-indicator"><div class="status-dot"></div> LIVE</div>
+                </div>
+                <canvas id="ecgCanvas"></canvas>
+                <div class="ecg-meta">
+                    <div class="ecg-meta-item">
+                        <div class="val">100 Hz</div>
+                        <div class="lbl">Sampling</div>
+                    </div>
+                    <div class="ecg-meta-item">
+                        <div class="val">12</div>
+                        <div class="lbl">Leads</div>
+                    </div>
+                    <div class="ecg-meta-item">
+                        <div class="val">5</div>
+                        <div class="lbl">Classes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="num">21,799</div>
+            <div class="label">PTB-XL ECG Records</div>
+            <div class="sub">records100 @ 100 Hz</div>
+        </div>
+        <div class="stat-card">
+            <div class="num">1.85M</div>
+            <div class="label">Model Parameters</div>
+            <div class="sub">-CardioIQ</div>
+        </div>
+        <div class="stat-card">
+            <div class="num">0.9073</div>
+            <div class="label">Best Val AUROC</div>
+            <div class="sub">Epoch 17 / 30</div>
+        </div>
+        <div class="stat-card">
+            <div class="num">30</div>
+            <div class="label">MC Dropout Samples</div>
+            <div class="sub">Uncertainty at inference</div>
+        </div>
+    </div>
+
+    <!-- Overview -->
+    <section id="overview">
+        <div class="section-label">01 · Project Overview</div>
+        <h2>Multi-Label Bayesian ECG Classification</h2>
+        <p class="section-desc">
+            An Adaptive Bayesian Multi-Scale CNN–Mamba Framework for Uncertainty-Aware Multi-Label ECG Classification.
+        </p>
+
+        <div class="config-grid">
+            <div class="config-item"><span class="k">task_type</span><span class="v">Multi-label classification</span></div>
+            <div class="config-item"><span class="k">dataset</span><span class="v">PTB-XL (21,799 records)</span></div>
+            <div class="config-item"><span class="k">split</span><span class="v">Train 17,084 · Val 2,146 · Test 2,158</span></div>
+            <div class="config-item"><span class="k">classes</span><span class="v">NORM · MI · STTC · CD · HYP</span></div>
+            <div class="config-item"><span class="k">input_shape</span><span class="v">[B, 3, 12, 1000]</span></div>
+            <div class="config-item"><span class="k">output_shape</span><span class="v">[B, 5] logits → sigmoid</span></div>
+            <div class="config-item"><span class="k">optimizer</span><span class="v">AdamW · lr=2e-4 · cosine schedule</span></div>
+            <div class="config-item"><span class="k">loss</span><span class="v">BCEWithLogits + KL (λ=1e-5)</span></div>
+        </div>
+    </section>
+
+    <!-- Pipeline -->
+    <section id="pipeline">
+        <div class="section-label">02 — Signal Processing Pipeline</div>
+        <h2>End-to-End Data Flow</h2>
+        <p class="section-desc">
+            Raw 12-lead WFDB records pass through a deterministic preprocessing chain,
+            then adaptive multi-scale windowing before entering the Bayesian encoder.
+        </p>
+
+        <div class="pipeline-flow">
+            <div class="pipe-step">
+                <div class="icon">📡</div>
+                <div class="name">Raw ECG</div>
+                <div class="detail">WFDB · 12 leads</div>
+            </div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-step">
+                <div class="icon">🔧</div>
+                <div class="name">Preprocessing</div>
+                <div class="detail">Butterworth · db4 wavelet</div>
+            </div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-step">
+                <div class="icon">🪟</div>
+                <div class="name">Adaptive Windows</div>
+                <div class="detail">2.5s · 5s · 10s → 1000</div>
+            </div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-step">
+                <div class="icon">🧠</div>
+                <div class="name">Bayesian CNN</div>
+                <div class="detail">Kernels 5·9·17·31</div>
+            </div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-step">
+                <div class="icon">🌀</div>
+                <div class="name">Mamba Encoder</div>
+                <div class="detail">3 layers · hidden=128</div>
+            </div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-step">
+                <div class="icon">🎲</div>
+                <div class="name">MC Sampling</div>
+                <div class="detail">30 stochastic passes</div>
+            </div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-step">
+                <div class="icon">📊</div>
+                <div class="name">Prediction</div>
+                <div class="detail">Prob + Uncertainty</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Architecture -->
+    <section id="architecture">
+        <div class="section-label">03 — Model Architecture</div>
+        <h2>BayesianECGMamba</h2>
+        <p class="section-desc">
+            The model fuses three temporal scales via residual fusion, encodes with a
+            Mamba-inspired state-space block (fallback used when mamba-ssm unavailable),
+            applies 4-head attention pooling, and outputs through Bayesian linear layers.
+        </p>
+
+        <div class="arch-grid">
+            <div class="arch-box">
+                <div class="step-num">STAGE 01</div>
+                <h3>Multi-Scale Bayesian CNN</h3>
+                <p>Four parallel branches with kernel sizes 5, 9, 17, 31 extract morphology at different temporal scales. Each branch uses BayesianConv1d + BatchNorm + GELU + BayesianResidualBlock.</p>
+                <span class="spec">4 branches · 32 ch each → 128 fused</span>
+            </div>
+            <div class="arch-box">
+                <div class="step-num">STAGE 02</div>
+                <h3>Residual Scale Fusion</h3>
+                <p>Three adaptive windows (2.5 s, 5 s, 10 s resampled to 1000 pts) are processed independently, then fused with learned residual connections across scales.</p>
+                <span class="spec">3 scales · energy-centered crop</span>
+            </div>
+            <div class="arch-box">
+                <div class="step-num">STAGE 03</div>
+                <h3>Mamba State-Space Encoder</h3>
+                <p>3-layer sequence encoder captures long-range temporal dependencies in the token sequence produced by the CNN backbone.</p>
+                <span class="spec">mamba_layers=3 · hidden=128</span>
+            </div>
+            <div class="arch-box">
+                <div class="step-num">STAGE 04</div>
+                <h3>Attention Fusion</h3>
+                <p>4-head self-attention aggregates the encoded token sequence into a fixed-size representation for classification.</p>
+                <span class="spec">heads=4 · dropout=0.20</span>
+            </div>
+            <div class="arch-box">
+                <div class="step-num">STAGE 05</div>
+                <h3>Bayesian Classifier Head</h3>
+                <p>Two BayesianLinear layers (128→64→5) with LayerNorm and GELU. Weight uncertainty via Gaussian posterior with softplus-parameterized σ.</p>
+                <span class="spec">BayesianLinear × 2</span>
+            </div>
+            <div class="arch-box">
+                <div class="step-num">STAGE 06</div>
+                <h3>Variational Inference</h3>
+                <p>KL divergence against N(0,1) prior is summed across all Bayesian layers and normalized by dataset size. MC dropout at inference yields epistemic uncertainty.</p>
+                <span class="spec">kl_weight=1e-5 · mc_samples=30</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Results -->
+    <section id="results">
+        <div class="section-label">04 — Experimental Results</div>
+        <h2>Evaluation on PTB-XL Test Split</h2>
+        <p class="section-desc">
+            Metrics reported on the official PTB-XL test fold (strat_fold=10, n=2,158).
+            Best checkpoint selected by validation macro AUROC at epoch 17.
+            All values taken directly from notebook training run on Google Colab T4 GPU.
+        </p>
+
+        <div class="results-layout">
+            <div class="metric-panel">
+                <h3>Test Set Metrics (Deterministic)</h3>
+                <div class="metric-row">
+                    <span class="key">Macro AUROC</span>
+                    <div class="metric-bar-wrap"><div class="metric-bar"><div class="metric-bar-fill" data-width="89.47"></div></div></div>
+                    <span class="val">0.8947</span>
+                </div>
+                <div class="metric-row">
+                    <span class="key">Macro AUPRC</span>
+                    <div class="metric-bar-wrap"><div class="metric-bar"><div class="metric-bar-fill" data-width="75.59"></div></div></div>
+                    <span class="val">0.7559</span>
+                </div>
+                <div class="metric-row">
+                    <span class="key">Macro F1</span>
+                    <div class="metric-bar-wrap"><div class="metric-bar"><div class="metric-bar-fill" data-width="69.79"></div></div></div>
+                    <span class="val">0.6979</span>
+                </div>
+                <div class="metric-row">
+                    <span class="key">Micro F1</span>
+                    <div class="metric-bar-wrap"><div class="metric-bar"><div class="metric-bar-fill" data-width="73.83"></div></div></div>
+                    <span class="val">0.7383</span>
+                </div>
+                <div class="metric-row">
+                    <span class="key">Label Accuracy</span>
+                    <div class="metric-bar-wrap"><div class="metric-bar"><div class="metric-bar-fill" data-width="85.36"></div></div></div>
+                    <span class="val">0.8536</span>
+                </div>
+                <div class="metric-row">
+                    <span class="key">Exact Match Ratio</span>
+                    <div class="metric-bar-wrap"><div class="metric-bar"><div class="metric-bar-fill" data-width="53.85"></div></div></div>
+                    <span class="val">0.5385</span>
+                </div>
+                <div class="metric-row">
+                    <span class="key">Macro Precision</span>
+                    <div class="metric-bar-wrap"><div class="metric-bar"><div class="metric-bar-fill" data-width="65.71"></div></div></div>
+                    <span class="val">0.6571</span>
+                </div>
+                <div class="metric-row">
+                    <span class="key">Macro Recall</span>
+                    <div class="metric-bar-wrap"><div class="metric-bar"><div class="metric-bar-fill" data-width="76.07"></div></div></div>
+                    <span class="val">0.7607</span>
+                </div>
+            </div>
+
+            <div class="metric-panel">
+                <h3>Validation Best (Epoch 17)</h3>
+                <div class="metric-row">
+                    <span class="key">Val Macro AUROC</span>
+                    <span class="val">0.9073</span>
+                </div>
+                <div class="metric-row">
+                    <span class="key">Val Macro F1</span>
+                    <span class="val">0.7092</span>
+                </div>
+                <div class="metric-row">
+                    <span class="key">Val Label Accuracy</span>
+                    <span class="val">0.8541</span>
+                </div>
+                <div class="metric-row">
+                    <span class="key">Val Exact Match</span>
+                    <span class="val">0.5270</span>
+                </div>
+                <div class="metric-row">
+                    <span class="key">Train Loss (final)</span>
+                    <span class="val">0.3860</span>
+                </div>
+                <div class="metric-row">
+                    <span class="key">Train BCE (final)</span>
+                    <span class="val">0.3842</span>
+                </div>
+
+                <h3 style="margin-top: 1.75rem;">MC Bayesian Confidence (Test Avg)</h3>
+                <div class="class-grid">
+                    <div class="class-chip"><div class="cls-name">NORM</div><div class="cls-conf">95.16%</div></div>
+                    <div class="class-chip"><div class="cls-name">MI</div><div class="cls-conf">94.08%</div></div>
+                    <div class="class-chip"><div class="cls-name">STTC</div><div class="cls-conf">95.07%</div></div>
+                    <div class="class-chip"><div class="cls-name">CD</div><div class="cls-conf">94.10%</div></div>
+                    <div class="class-chip"><div class="cls-name">HYP</div><div class="cls-conf">93.82%</div></div>
+                </div>
+                <p style="font-size:0.75rem;color:var(--muted);margin-top:1rem;">
+                    Confidence = 1 − std(prob) across 30 MC forward passes. HYP remains the hardest class (F1=0.47 on test).
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Config -->
+    <section id="config">
+        <div class="section-label">05 — Training Configuration</div>
+        <h2>Hyperparameters & Environment</h2>
+        <p class="section-desc">
+            All configuration values from the <code>CFG</code> dataclass used in
+            <code>Bayesian_ECG.ipynb</code>. Checkpoints saved to Google Drive.
+        </p>
+
+        <div class="config-grid">
+            <div class="config-item"><span class="k">epochs</span><span class="v">30</span></div>
+            <div class="config-item"><span class="k">batch_size</span><span class="v">32</span></div>
+            <div class="config-item"><span class="k">learning_rate</span><span class="v">2e-4</span></div>
+            <div class="config-item"><span class="k">weight_decay</span><span class="v">1e-4</span></div>
+            <div class="config-item"><span class="k">kl_weight</span><span class="v">1e-5</span></div>
+            <div class="config-item"><span class="k">dropout</span><span class="v">0.20</span></div>
+            <div class="config-item"><span class="k">hidden_dim</span><span class="v">128</span></div>
+            <div class="config-item"><span class="k">signal_len</span><span class="v">1000 samples (10 s @ 100 Hz)</span></div>
+            <div class="config-item"><span class="k">sampling_rate</span><span class="v">100 Hz (records100)</span></div>
+            <div class="config-item"><span class="k">mc_samples</span><span class="v">30</span></div>
+            <div class="config-item"><span class="k">encoder</span><span class="v">Mamba-inspired fallback</span></div>
+            <div class="config-item"><span class="k">gpu</span><span class="v">Google Colab T4</span></div>
+            <div class="config-item"><span class="k">amp</span><span class="v">torch.cuda.amp (mixed precision)</span></div>
+            <div class="config-item"><span class="k">grad_clip</span><span class="v">max_norm=1.0</span></div>
+            <div class="config-item"><span class="k">pos_weight (HYP)</span><span class="v">7.0623 (class imbalance)</span></div>
+            <div class="config-item"><span class="k">checkpoint</span><span class="v">best_model.pt @ epoch 17</span></div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <h3>Bayesian+Mamba Architecture for Probabilistic ECG Classification</h3>
+        <p>PTB-XL · Variational Bayesian Inference · Monte Carlo Dropout · Multi-Label Diagnosis</p>
+        <p style="margin-top:0.75rem;"><a href="https://github.com/pratham2606/CardioIQ" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:none;font-weight:600;">github.com/pratham2606/CardioIQ</a></p>
+        <div class="tech-tags">
+            <span class="tech-tag">PyTorch</span>
+            <span class="tech-tag">WFDB</span>
+            <span class="tech-tag">PyWavelets</span>
+            <span class="tech-tag">scikit-learn</span>
+            <span class="tech-tag">BayesianConv1d</span>
+            <span class="tech-tag">State-Space Model</span>
+            <span class="tech-tag">MC Dropout</span>
+            <span class="tech-tag">PTB-XL</span>
+        </div>
+    </footer>
+
+</div>
+
+<script>
+
+(function init3DBackground() {
+    const canvas = document.getElementById('bg3d');
+    const ctx = canvas.getContext('2d');
+    let W, H, particles = [], meshes = [];
+    const FOV = 400;
+    let t = 0;
+
+    function resize() {
+        W = canvas.width = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Particle field
+    for (let i = 0; i < 180; i++) {
+        particles.push({
+            x: (Math.random() - 0.5) * W * 2,
+            y: (Math.random() - 0.5) * H * 2,
+            z: Math.random() * 800 + 100,
+            vx: (Math.random() - 0.5) * 0.4,
+            vy: (Math.random() - 0.5) * 0.4,
+            vz: (Math.random() - 0.5) * 0.6,
+            r: Math.random() * 2 + 0.5,
+            hue: Math.random() > 0.5 ? 160 : 260
+        });
+    }
+
+    // Wireframe icosahedron meshes
+    function createMesh(cx, cy, cz, scale, speed) {
+        const phi = (1 + Math.sqrt(5)) / 2;
+        const verts = [
+            [-1,phi,0],[1,phi,0],[-1,-phi,0],[1,-phi,0],
+            [0,-1,phi],[0,1,phi],[0,-1,-phi],[0,1,-phi],
+            [phi,0,-1],[phi,0,1],[-phi,0,-1],[-phi,0,1]
+        ];
+        const edges = [[0,1],[0,5],[0,7],[0,10],[0,11],[1,5],[1,8],[1,9],
+                       [2,3],[2,4],[2,6],[2,10],[3,4],[3,8],[3,9],
+                       [4,9],[4,5],[5,11],[6,7],[6,10],[6,11],[7,10],
+                       [8,9],[8,3],[9,4],[10,11]];
+        return { cx, cy, cz, scale, speed, verts, edges, rx: 0, ry: 0, rz: 0 };
+    }
+
+    meshes = [
+        createMesh(W * 0.15, H * 0.3, 300, 60, 0.003),
+        createMesh(W * 0.85, H * 0.65, 450, 45, -0.004),
+        createMesh(W * 0.5, H * 0.15, 550, 35, 0.002),
+        createMesh(W * 0.75, H * 0.25, 380, 50, 0.005),
+    ];
+
+    function project(x, y, z) {
+        const s = FOV / (FOV + z);
+        return { x: W / 2 + x * s, y: H / 2 + y * s, s };
+    }
+
+    function rotateY(x, y, z, a) {
+        const c = Math.cos(a), s = Math.sin(a);
+        return [x * c + z * s, y, -x * s + z * c];
+    }
+    function rotateX(x, y, z, a) {
+        const c = Math.cos(a), s = Math.sin(a);
+        return [x, y * c - z * s, y * s + z * c];
+    }
+
+    function drawMesh(mesh) {
+        mesh.rx += mesh.speed;
+        mesh.ry += mesh.speed * 0.7;
+        mesh.rz += mesh.speed * 0.4;
+        mesh.cy += Math.sin(t * 0.008 + mesh.cx) * 0.3;
+
+        const projected = mesh.verts.map(v => {
+            let [x, y, z] = [v[0] * mesh.scale, v[1] * mesh.scale, v[2] * mesh.scale];
+            [x, y, z] = rotateX(x, y, z, mesh.rx);
+            [x, y, z] = rotateY(x, y, z, mesh.ry);
+            z += mesh.cz;
+            return project(mesh.cx + x, mesh.cy + y, z);
+        });
+
+        ctx.strokeStyle = 'rgba(0, 212, 170, 0.12)';
+        ctx.lineWidth = 0.8;
+        mesh.edges.forEach(([a, b]) => {
+            const pa = projected[a], pb = projected[b];
+            ctx.beginPath();
+            ctx.moveTo(pa.x, pa.y);
+            ctx.lineTo(pb.x, pb.y);
+            ctx.stroke();
+        });
+
+        projected.forEach(p => {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 2 * p.s, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(0, 212, 170, ${0.3 * p.s})`;
+            ctx.fill();
+        });
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, W, H);
+        t++;
+
+        // Particles
+        particles.forEach(p => {
+            p.x += p.vx; p.y += p.vy; p.z += p.vz;
+            if (p.z < 50) p.z = 900;
+            if (p.z > 900) p.z = 50;
+            const proj = project(p.x, p.y, p.z);
+            const alpha = Math.min(1, (900 - p.z) / 600) * 0.6;
+            ctx.beginPath();
+            ctx.arc(proj.x, proj.y, p.r * proj.s, 0, Math.PI * 2);
+            ctx.fillStyle = `hsla(${p.hue}, 80%, 60%, ${alpha})`;
+            ctx.fill();
+        });
+
+        // Connection lines between nearby particles
+        ctx.strokeStyle = 'rgba(0, 212, 170, 0.04)';
+        ctx.lineWidth = 0.5;
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+                const dx = particles[i].x - particles[j].x;
+                const dy = particles[i].y - particles[j].y;
+                const dz = particles[i].z - particles[j].z;
+                const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+                if (dist < 120) {
+                    const pi = project(particles[i].x, particles[i].y, particles[i].z);
+                    const pj = project(particles[j].x, particles[j].y, particles[j].z);
+                    ctx.beginPath();
+                    ctx.moveTo(pi.x, pi.y);
+                    ctx.lineTo(pj.x, pj.y);
+                    ctx.globalAlpha = (1 - dist / 120) * 0.3;
+                    ctx.stroke();
+                    ctx.globalAlpha = 1;
+                }
+            }
+        }
+
+        meshes.forEach(drawMesh);
+        requestAnimationFrame(draw);
+    }
+    draw();
+})();
+
+(function initECG() {
+    const canvas = document.getElementById('ecgCanvas');
+    const ctx = canvas.getContext('2d');
+    let offset = 0;
+
+    function resize() {
+        canvas.width = canvas.offsetWidth * devicePixelRatio;
+        canvas.height = canvas.offsetHeight * devicePixelRatio;
+        ctx.scale(devicePixelRatio, devicePixelRatio);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    function ecgPoint(t) {
+        const cycle = t % 1;
+        if (cycle < 0.12) return 0.05 * Math.sin(cycle / 0.12 * Math.PI);
+        if (cycle < 0.16) return -0.08;
+        if (cycle < 0.20) return 1.0;
+        if (cycle < 0.24) return -0.35;
+        if (cycle < 0.32) return 0.05;
+        if (cycle < 0.42) return 0.25;
+        if (cycle < 0.50) return -0.25;
+        return 0.02 * Math.sin((cycle - 0.5) / 0.5 * Math.PI * 2);
+    }
+
+    function draw() {
+        const w = canvas.offsetWidth, h = canvas.offsetHeight;
+        ctx.clearRect(0, 0, w, h);
+
+        // Grid
+        ctx.strokeStyle = 'rgba(0,212,170,0.06)';
+        ctx.lineWidth = 0.5;
+        for (let x = 0; x < w; x += 20) {
+            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+        }
+        for (let y = 0; y < h; y += 20) {
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+        }
+
+        const midY = h * 0.5;
+        const amplitude = h * 0.32;
+        const speed = 0.004;
+
+        // Glow trail
+        ctx.shadowColor = '#00d4aa';
+        ctx.shadowBlur = 12;
+        ctx.strokeStyle = '#00d4aa';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+
+        for (let x = 0; x < w; x++) {
+            const t = (x / w * 4 + offset) % 1;
+            const y = midY - ecgPoint(t) * amplitude;
+            x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Scan dot
+        const dotX = (offset % 1) * w;
+        const dotY = midY - ecgPoint(offset % 1) * amplitude;
+        ctx.beginPath();
+        ctx.arc(dotX, dotY, 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#00d4aa';
+        ctx.shadowColor = '#00d4aa';
+        ctx.shadowBlur = 20;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        offset = (offset + speed) % 4;
+        requestAnimationFrame(draw);
+    }
+    draw();
+})();
+
+(function initBars() {
+    const fills = document.querySelectorAll('.metric-bar-fill');
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+            if (e.isIntersecting) {
+                const w = e.target.dataset.width;
+                e.target.style.width = w + '%';
+            }
+        });
+    }, { threshold: 0.3 });
+    fills.forEach(f => observer.observe(f));
+})();
+
+document.querySelectorAll('nav a, .btn').forEach(a => {
+    a.addEventListener('click', e => {
+        const href = a.getAttribute('href');
+        if (href && href.startsWith('#')) {
+            e.preventDefault();
+            document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+});
+</script>
+</body>
+</html>
